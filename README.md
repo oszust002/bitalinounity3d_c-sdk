@@ -3,6 +3,7 @@ This version is actually still in development. It should not be distribued nor u
 TODO:
 
 For C# SDK
+
 - Do class exception
 - Do class SensorDataConvertor
 - Do documentation
