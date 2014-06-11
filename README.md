@@ -17,6 +17,7 @@ If your Unity project does not recognize System.IO.Ports, go to Project Setting 
 * Others
 
 Framework: .NET 2.0
+
 License: 3-Clause BSD
 
 Copyright (c) 2014, Tokyo University of Science
