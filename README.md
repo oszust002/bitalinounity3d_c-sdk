@@ -1,10 +1,16 @@
+* Description
+
 Contains the BITalino C# SDK as well as a three projects developed under Unity3D and implementing the C# SDK.
 We developed those projects to test the viability of BITalino under Unity3D, as well as our C# SDK.
+
+* Organization
 
 There are three scenes:
 Demo: which display the ToString() of the frames read.
 Graph: which display the Graph of the frames read.
 SuperCopter: a basic application using the luminosity of the room. After the calibration, change the luminosity of BITalino's surrounding to avoid missiles.
+
+* Others
 
 Framework: .NET 2.0
 License: 3-Clause BSD
@@ -34,4 +40,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+* Developers
+
+VERHULST Adrien
+DOUX Paulin
+
+For LARIS (ISTIA, University of Angers) and Tokyo University of Science
 Contact: VERHULST Adrien or DOUX Paulin.
