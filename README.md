@@ -1,25 +1,11 @@
-This version is actually still in development. It should not be distribued nor used in project.
+Contains the BITalino C# SDK as well as a three projects developed under Unity3D and implementing the C# SDK.
+We developed those projects to test the viability of BITalino under Unity3D, as well as our C# SDK.
 
-TODO:
+There are three scenes:
+Demo: which display the ToString() of the frames read.
+Graph: which display the Graph of the frames read.
+SuperCopter: a basic application using the luminosity of the room. After the calibration, change the luminosity of BITalino's surrounding to avoid missiles.
 
-For C# SDK
 
-- Do class exception
-- Do class SensorDataConvertor
-- Do documentation
-- Do BitalinoCommunicationSocket ...
-- Test it
+Contact: VERHULST Adrien or DOUX Paulin.
 
-For Bitalino Unity
-
-- Test BitalinoCommunicationSocket
-- Do BitalinoSocket
-- Do TestBitalinoValue
-- Do TestInteractionBitalinoUnity
-- Do GUIBitalino
-- Refactor a little bit of everything ...
-- Do documentation
-- Test it
-
-Finally
-- Do a small project implementing C# SDK, Bitalino Unity.
