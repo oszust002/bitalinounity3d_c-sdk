@@ -10,6 +10,10 @@ Demo: which display the ToString() of the frames read.
 Graph: which display the Graph of the frames read.
 SuperCopter: a basic application using the luminosity of the room. After the calibration, change the luminosity of BITalino's surrounding to avoid missiles.
 
+* Know issues
+
+If your Unity project does not recognize System.IO.Ports, go to Project Setting > Player > and change .NET 2.0 Subset by .NET 2.0
+
 * Others
 
 Framework: .NET 2.0
@@ -46,4 +50,7 @@ VERHULST Adrien
 DOUX Paulin
 
 For LARIS (ISTIA, University of Angers) and Tokyo University of Science
-Contact: VERHULST Adrien or DOUX Paulin.
+
+* Contact
+
+VERHULST Adrien or DOUX Paulin.
