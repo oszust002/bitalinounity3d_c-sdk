@@ -1,3 +1,5 @@
+This is fork of original BITalino API for Unity: https://bitbucket.org/tusistia/bitalinounity3d_c-sdk
+
 * Description
 
 Contains the BITalino C# SDK as well as a three projects developed under Unity3D and implementing the C# SDK.
