@@ -3,19 +3,21 @@
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using UnityEngine;
-using System.Collections;
 using System.Threading;
 using System;
 using System.IO;
+using System.Linq;
 using System.Diagnostics;
 
-public class BITalinoReader : MonoBehaviour {
-    public ManagerBITalino manager;
+public class BitalinoReader : MonoBehaviour {
+
+    public BitalinoManager manager;
     public int BufferSize = 100;
     public bool rawData = false;
     public bool dataFile = false;
     public string dataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) ;
 
+    private Thread connectionThread;
     private Thread readThread;
     private BITalinoFrame[] frameBuffer;
     private bool _Start = false;
@@ -27,27 +29,31 @@ public class BITalinoReader : MonoBehaviour {
         stopWatch = new Stopwatch();
         dataPath += "\\" + DateTime.Now.ToString("MMddHHmmssfff") + "_Data.csv";
         frameBuffer = new BITalinoFrame[BufferSize];
-        
-        StartCoroutine(start());
+
+        connectionThread = new Thread(start);
+        connectionThread.Start();
 	}
+
+    private void OnDisable()
+    {
+        OnApplicationQuit();
+    }
 
     /// <summary>
     /// Start the connection
     /// </summary>
-    private IEnumerator start()
+    private void start()
     {
         readThread = new Thread(Read);
         while (manager.IsReady == false)
         {
-            yield return new WaitForSeconds(0.5f);
+            Thread.Sleep(TimeSpan.FromSeconds(0.5));
         }
         
         manager.Connection();
-        yield return new WaitForSeconds(0.5f);
-        
+        Thread.Sleep(TimeSpan.FromSeconds(0.5));
         manager.StartAcquisition();
-        yield return new WaitForSeconds(0.5f);
-
+        Thread.Sleep(TimeSpan.FromSeconds(0.5));
         stopWatch.Start();
         for (int i = 0; i < BufferSize; i++)
         {
@@ -57,8 +63,9 @@ public class BITalinoReader : MonoBehaviour {
             }
             else
             {
-                frameBuffer[i] = convert(manager.Read(1)[0]);
+				frameBuffer[i] = convert(manager.Read(1)[0]);
             }
+
             WriteData(frameBuffer[i]);
         }
 
@@ -74,6 +81,7 @@ public class BITalinoReader : MonoBehaviour {
         while (_Start)
         {
             BITalinoFrame[] frames = manager.Read(1);
+            
             int i;
             for (i = 0; i < BufferSize - 1; i++)
             {
@@ -87,7 +95,7 @@ public class BITalinoReader : MonoBehaviour {
             {
                 frameBuffer[i] = convert(frames[0]);
             }
-            WriteData(frameBuffer[i]);
+            WriteData (frameBuffer[i]);
         }
     }
 
@@ -98,6 +106,19 @@ public class BITalinoReader : MonoBehaviour {
     public BITalinoFrame[] getBuffer()
     {
         return this.frameBuffer;
+    }
+
+    public double[] getBufferAnalogValues(BitalinoManager.Analog analog)
+    {
+        int indexOfAnalog = Array.IndexOf(manager.Analogs, analog);
+        if (indexOfAnalog == -1)
+        {
+            throw new BITalinoException(BITalinoErrorTypes.INVALID_ARGUMENT);
+        } else
+        {
+            return getBuffer().Select(x => x.GetAnalogValue(indexOfAnalog)).ToArray();
+        }
+        
     }
 
     /// <summary>
@@ -119,27 +140,31 @@ public class BITalinoReader : MonoBehaviour {
     private BITalinoFrame convert (BITalinoFrame frame)
     {
         int i = 0;
-        foreach(ManagerBITalino.Channels channels in manager.AnalogChannels)
+		foreach(BitalinoManager.Channels channels in manager.AnalogChannels)
         {
+            
             switch(channels)
             {
-                case ManagerBITalino.Channels.EMG :
-                    frame.SetAnalogValue(i, SensorDataConvertor.ScaleEMG_mV(frame.GetAnalogValue(i)));
+				case BitalinoManager.Channels.EMG :
+                    frame.SetAnalogValue(i, SensorDataConvertor.ScaleECG_mV(frame.GetAnalogValue(i), i));
                     break;
-                case ManagerBITalino.Channels.EDA:
-                    frame.SetAnalogValue(i, SensorDataConvertor.ScaleEDA(frame.GetAnalogValue(i)));
+				case BitalinoManager.Channels.EDA:
+                    frame.SetAnalogValue(i, SensorDataConvertor.ScaleEDA(frame.GetAnalogValue(i), i));
                     break;
-                case ManagerBITalino.Channels.LUX:
+				case BitalinoManager.Channels.LUX:
                     frame.SetAnalogValue(i, SensorDataConvertor.ScaleLUX(frame.GetAnalogValue(i)));
                     break;
-                case ManagerBITalino.Channels.ECG:
-                    frame.SetAnalogValue(i, SensorDataConvertor.ScaleECG_mV(frame.GetAnalogValue(i)));
+				case BitalinoManager.Channels.ECG:
+                    frame.SetAnalogValue(i, SensorDataConvertor.ScaleECG_mV(frame.GetAnalogValue(i), i));
                     break;
-                case ManagerBITalino.Channels.ACC:
+				case BitalinoManager.Channels.ACC:
                     frame.SetAnalogValue(i, SensorDataConvertor.ScaleACC(frame.GetAnalogValue(i)));
                     break;
-                case ManagerBITalino.Channels.BATT:
+				case BitalinoManager.Channels.BATT:
                     frame.SetAnalogValue(i, SensorDataConvertor.ScaleBATT(frame.GetAnalogValue(i)));
+                    break;
+                case BitalinoManager.Channels.EEG:
+                    frame.SetAnalogValue(i, SensorDataConvertor.ScaleEEG_mV(frame.GetAnalogValue(i), i));
                     break;
             }
             i++;
@@ -151,7 +176,7 @@ public class BITalinoReader : MonoBehaviour {
     /// Save the read data in a file if data_file is true
     /// </summary>
     /// <param name="frame">data read</param>
-    private void WriteData(BITalinoFrame frame)
+    private void WriteData (BITalinoFrame frame)
     {
         try
         {
@@ -159,12 +184,12 @@ public class BITalinoReader : MonoBehaviour {
             {
                 if (sw == null)
                 {
-                    sw = File.AppendText(dataPath);
-                    sw.WriteLine(getChannelsRead());
+                    sw = File.AppendText (dataPath);
+                    sw.WriteLine (getChannelsRead ());
                     sw.Flush();
                 }
-                sw.WriteLine(CSV_Parser.ToCSV((stopWatch.Elapsed.TotalSeconds) + " " + frame.ToString(),manager.AnalogChannels.Length));
-                sw.Flush();
+                sw.WriteLine (CSV_Parser.ToCSV ((stopWatch.Elapsed.TotalSeconds) + " " + frame.ToString(), manager.AnalogChannels.Length));
+                sw.Flush ();
             }
         }
         catch (Exception e)
@@ -176,6 +201,12 @@ public class BITalinoReader : MonoBehaviour {
     /// </summary>
     private void OnApplicationQuit()
     {
+
+        if (!asStart && connectionThread != null)
+        {
+            while (connectionThread.IsAlive) ;
+        }
+
         if (asStart == true)
         {
             _Start = false;
@@ -201,26 +232,26 @@ public class BITalinoReader : MonoBehaviour {
     private string getChannelsRead()
     {
         string result = "Time";
-        foreach (ManagerBITalino.Channels channels in manager.AnalogChannels)
+		foreach (BitalinoManager.Channels channels in manager.AnalogChannels)
         {
             switch (channels)
             {
-                case ManagerBITalino.Channels.EMG:
+				case BitalinoManager.Channels.EMG:
                     result += ";EMG";
                     break;
-                case ManagerBITalino.Channels.EDA:
+				case BitalinoManager.Channels.EDA:
                     result += ";EDA";
                     break;
-                case ManagerBITalino.Channels.LUX:
+				case BitalinoManager.Channels.LUX:
                     result += ";LUX";
                     break;
-                case ManagerBITalino.Channels.ECG:
+				case BitalinoManager.Channels.ECG:
                     result += ";ECG";
                     break;
-                case ManagerBITalino.Channels.ACC:
+				case BitalinoManager.Channels.ACC:
                     result += ";ACC";
                     break;
-                case ManagerBITalino.Channels.BATT:
+				case BitalinoManager.Channels.BATT:
                     result += ";BATT";
                     break;
             }

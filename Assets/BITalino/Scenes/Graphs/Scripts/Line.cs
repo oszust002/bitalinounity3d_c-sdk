@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 
 public class Line : MonoBehaviour {
-    public BITalinoReader reader;
+    public BitalinoReader reader;
     public int channelRead = 0;
     public double divisor = 1;
 
@@ -22,6 +22,7 @@ public class Line : MonoBehaviour {
 	/// Draw the new point of the line
 	/// </summary>
 	void Update () {
+
         if (reader.asStart)
         {
             int i = 0;

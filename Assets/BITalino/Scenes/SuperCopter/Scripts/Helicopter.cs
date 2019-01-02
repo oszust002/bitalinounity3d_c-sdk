@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 
 public class Helicopter : MonoBehaviour {
-    public BITalinoReader reader;
+    public BitalinoReader reader;
     public GUIText text;
 
     private bool _asStart = false;
@@ -41,7 +41,7 @@ public class Helicopter : MonoBehaviour {
 
         foreach(BITalinoFrame frame in reader.getBuffer())
         {
-            Cmax += frame.GetAnalogValue(2);
+            Cmax += frame.GetAnalogValue(0);
         }
         Cmax = Cmax / reader.BufferSize;
         rapport = (float)(9.0 / Cmax);
@@ -69,7 +69,7 @@ public class Helicopter : MonoBehaviour {
         BITalinoFrame[] frames = reader.getBuffer();
         float pos = 0;
         for (int i = 20; i > 0; i--)
-            pos += (float)frames[reader.BufferSize - i].GetAnalogValue(2);
+            pos += (float)frames[reader.BufferSize - i].GetAnalogValue(0);
         pos = ((pos / 20f) * rapport) - 5f;
         return pos;
     }

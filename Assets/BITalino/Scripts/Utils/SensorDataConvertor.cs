@@ -25,11 +25,11 @@ public static class SensorDataConvertor {
     /// </summary>
     /// <param name="raw">Data converted</param>
     /// <returns>Result of the convertion</returns>
-    public static double ScaleEMG_V(double raw)
+    public static double ScaleEMG_V(double raw, int channel)
     {
-        //EMGV = (EMGB * Vcc / (2^n - 1) - Vcc / 2) / GEMG
+        //EMGV = (EMGB * Vcc / (2^n) - Vcc / 2) / GEMG
         //EMGmV = EMGV * 1000
-        return (raw * VCC / 1023 - 1.5) / 1000;
+        return (raw * VCC / getResolution(channel) - VCC / 2) / 1000;
     }
 
     /// <summary>
@@ -37,11 +37,11 @@ public static class SensorDataConvertor {
     /// </summary>
     /// <param name="raw">Data converted</param>
     /// <returns>Result of the convertion</returns>
-    public static double ScaleEMG_mV(double raw)
+    public static double ScaleEMG_mV(double raw, int channel)
     {
-        //EMGV = (EMGB * Vcc / (2^n - 1) - Vcc / 2) / GEMG
+        //EMGV = (EMGB * Vcc / (2^n) - Vcc / 2) / GEMG
         //EMGmV = EMGV * 1000
-        return (ScaleEMG_V(raw)) * 1000;
+        return (ScaleEMG_V(raw, channel)) * 1000;
     }
 
     /// <summary>
@@ -49,11 +49,11 @@ public static class SensorDataConvertor {
     /// </summary>
     /// <param name="raw">Data converted</param>
     /// <returns>Result of the convertion</returns>
-    public static double ScaleECG_V(double raw)
+    public static double ScaleECG_V(double raw, int channel)
     {
-        //ECGV = (ECGB * Vcc / (2^n - 1) - Vcc / 2) / GECG
+        //ECGV = (ECGB * Vcc / (2^n) - Vcc / 2) / GECG
         //ECGmV = ECGV * 1000
-        return (raw * VCC / 1023 - 1.5) / 1100;
+		return (raw * VCC / getResolution(channel) - VCC / 2) / 1100;
     }
 
     /// <summary>
@@ -61,11 +61,11 @@ public static class SensorDataConvertor {
     /// </summary>
     /// <param name="raw">Data converted</param>
     /// <returns>Result of the convertion</returns>
-    public static double ScaleECG_mV(double raw)
+    public static double ScaleECG_mV(double raw, int channel)
     {
-        //ECGV = (ECGB * Vcc / (2^n - 1) - Vcc / 2) / GECG
+        //ECGV = (ECGB * Vcc / (2^n) - Vcc / 2) / GECG
         //ECGmV = ECGV * 1000
-        return (ScaleECG_V(raw)) * 1000;
+        return (ScaleECG_V(raw, channel)) * 1000;
     }
 
     /// <summary>
@@ -73,11 +73,11 @@ public static class SensorDataConvertor {
     /// </summary>
     /// <param name="raw">Data converted</param>
     /// <returns>Result of the convertion</returns>
-    public static double ScaleEDA(double raw)
+    public static double ScaleEDA(double raw, int channel)
     {
-        //RMOhm = 1 - EDAB / ( 2^n - 1)
+        //RMOhm = 1 - EDAB / ( 2^n)
         //EDAµS = 1 / RMOhm
-        return 1 / (1 - raw / 1023);
+        return 1 / (1 - raw / Math.Pow(2,channel));
     }
 
     /// <summary>
@@ -111,7 +111,21 @@ public static class SensorDataConvertor {
     public static double ScaleBATT(double raw)
     {
         //V = (raw * Vcc / (2^n - 1) - Vcc / 2)
-        return (raw * VCC / 1023 - 1.5);
+        return (raw * VCC / 1023 - VCC / 2);
     }
 
+    internal static double ScaleEEG_mV(double raw, int channel)
+    {
+        return ScaleEEG_V(raw, channel) * 1000;
+    }
+
+    private static double ScaleEEG_V(double raw, int channel)
+    {
+        return (raw * VCC / getResolution(channel) - VCC / 2) / 40000;
+    }
+
+    private static int getResolution(int channel)
+    {
+        return channel < 4 ? 1023 : 63;
+    }
 }

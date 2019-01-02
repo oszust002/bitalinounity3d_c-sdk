@@ -5,6 +5,7 @@
 using System;
 using System.Collections;
 using System.IO.Ports;
+using System.Linq;
 using System.Threading;
 
 public class BITalinoDevice
@@ -83,6 +84,11 @@ public class BITalinoDevice
         if ( analogChannels.Length > 6 | analogChannels.Length == 0 )
         {
             throw new Exception ( "Length analogChannels" );
+        }
+        
+        if (analogChannels.Distinct().Count() != analogChannels.Length)
+        {
+            throw new BITalinoException(BITalinoErrorTypes.ANALOG_CHANNELS_NOT_VALID);
         }
 
         foreach ( int i in analogChannels )

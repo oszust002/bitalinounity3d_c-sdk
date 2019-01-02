@@ -7,9 +7,9 @@ using System.Collections;
 
 public class GUIBitalino : MonoBehaviour {
 
-    private ManagerBITalino managerB;
+    private BitalinoManager managerB;
 
-    public ManagerBITalino ManagerB { get; set; }
+	public BitalinoManager ManagerB { get; set; }
 
 	// Use this for initialization
 	void Start () {

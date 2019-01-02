@@ -6,16 +6,35 @@ using UnityEngine;
 using System.Collections;
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 
-public class ManagerBITalino : MonoBehaviour {
+[Serializable]
+public class AnalogChannel
+{
+    public BitalinoManager.Analog analog;
+    public BitalinoManager.Channels sensor;
+}
+
+public class BitalinoManager : MonoBehaviour {
 
     public enum AcquisitionState
     {
         Run = 0,
         NotRun = 1
     };
+
+    public enum Analog
+    {
+        A1,
+        A2,
+        A3,
+        A4,
+        A5,
+        A6
+    }
 
     public enum Channels
     {
@@ -24,15 +43,29 @@ public class ManagerBITalino : MonoBehaviour {
         LUX,
         ECG,
         ACC,
-        BATT
+        BATT,
+        EEG
     };
 
     // if need a GUI
     public GUIBitalino GUIB;
-    public BITalinoSerialPort scriptSerialPort;
+    public BitalinoSerialPort scriptSerialPort;
+    public AnalogChannel[] analogAndChannels;
 
-    public Channels[] AnalogChannels = { Channels.EMG,Channels.EDA,Channels.LUX,Channels.ECG,Channels.ACC,Channels.BATT };
-    public int SamplingRate = 1000;
+    public Analog[] Analogs
+    {
+        get
+        {
+            return analogAndChannels.Select(x => x.analog).ToArray();
+        }
+    }
+
+    [HideInInspector]
+    public Channels[] AnalogChannels
+    {
+        get { return analogAndChannels.Select(x => x.sensor).ToArray(); }
+    }
+    public int SamplingFrequency = 100;
     public bool logFile = false;
     public string logPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
@@ -101,7 +134,7 @@ public class ManagerBITalino : MonoBehaviour {
         {
             if ( bitalinoCommunication != null && device == null )
             {
-                device = new BITalinoDevice(bitalinoCommunication, convertChannels(), SamplingRate);
+                device = new BITalinoDevice(bitalinoCommunication, convertChannels(), SamplingFrequency);
             }
 
             device.Connection ( );
@@ -154,9 +187,7 @@ public class ManagerBITalino : MonoBehaviour {
     {
         try
         {
-            device.SamplingRate = SamplingRate;
-
-            Array.Sort(AnalogChannels);
+            device.SamplingRate = SamplingFrequency;
             device.AnalogChannels = convertChannels();
             device.StartAcquisition ();
             acquisitionState = AcquisitionState.Run;
@@ -232,9 +263,9 @@ public class ManagerBITalino : MonoBehaviour {
     /// <returns>Int tab of the AnalogChannels</returns>
     public int[] convertChannels()
     {
-        int[] convertChannels = new int[AnalogChannels.Length];
+        int[] convertChannels = new int[Analogs.Length];
         int i = 0;
-        foreach (Channels channel in AnalogChannels)
+        foreach (Channels channel in Analogs)
         {
             convertChannels[i] = (int)channel;
             i++;

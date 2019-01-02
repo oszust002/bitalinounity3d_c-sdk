@@ -12,6 +12,7 @@ public sealed class BITalinoFrameDecoder
         try
         {
             BITalinoFrame decodeFrame = new BITalinoFrame ( );
+            Console.WriteLine(buffer);
 
             int j = ( nbBytes - 1 ), CRC = 0, x0 = 0, x1 = 0, x2 = 0, x3 = 0, outs = 0, inp = 0;
             CRC = ( buffer [ j - 0 ] & 0x0F ) & 0xFF;
@@ -70,7 +71,7 @@ public sealed class BITalinoFrameDecoder
                 decodeFrame = new BITalinoFrame ( );
                 decodeFrame.Sequence = -1;
             }
-
+            
             return decodeFrame;
         }
         catch

@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Collections;
 
 public class Timer : MonoBehaviour {
-    public BITalinoReader reader;
+    public BitalinoReader reader;
 
 	// Use this for initialization
 	void Start () {
@@ -18,6 +18,6 @@ public class Timer : MonoBehaviour {
 	/// </summary>
 	void Update () {
         if (reader.asStart)
-            GetComponent("GUIText").guiText.text = reader.getTime();
+            GetComponent("GUIText").GetComponent<GUIText>().text = reader.getTime();
 	}
 }

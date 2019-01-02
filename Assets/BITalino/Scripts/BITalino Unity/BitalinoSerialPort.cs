@@ -6,9 +6,9 @@ using UnityEngine;
 using System.Collections;
 using System.IO.Ports;
 
-public class BITalinoSerialPort : MonoBehaviour {
+public class BitalinoSerialPort : MonoBehaviour {
 
-    public string portName = "COM4";
+    public string portName = "COM6";
     public int baudRate = 9600;
     public Parity parity = Parity.None;
     public int dataBits = 8;
@@ -16,11 +16,11 @@ public class BITalinoSerialPort : MonoBehaviour {
     public int ReadTimeOut = 5000;
     public int WriteTimeOut = 5000;
 
-    private ManagerBITalino managerB;
+    private BitalinoManager managerB;
     private SerialPort serialPort;
     private IBITalinoCommunication bitalinoCommunication;
 
-    public ManagerBITalino ManagerB { get; set; }
+    public BitalinoManager ManagerB { get; set; }
 
 	/// <summary>
 	/// Initialize the serial connection
